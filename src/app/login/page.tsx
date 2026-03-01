@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
 } from "firebase/auth";
 import {
   ShoppingBag,
@@ -20,8 +21,10 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +42,16 @@ export default function LoginPage() {
     }
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        router.replace("/");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
   const handleGoogleLogin = async () => {
     setLoading(true);
     setError("");
@@ -54,7 +67,7 @@ export default function LoginPage() {
           avatarUrl: result.user.photoURL || "",
         }),
       });
-      window.location.href = "/";
+      router.replace("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Google login failed");
     } finally {
@@ -84,7 +97,7 @@ export default function LoginPage() {
           }),
         });
       }
-      window.location.href = "/";
+      router.replace("/");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
