@@ -20,9 +20,10 @@ const navItems = [
 export function Sidebar() {
     const pathname = usePathname();
     const { user } = useAuthStore();
+    if (!user) return null;
 
     return (
-        <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-[#1a1d24] border-r border-border overflow-y-auto z-40">
+        <aside className="hidden lg:flex flex-col sticky top-0 self-start h-[calc(100vh-4rem)] w-64 shrink-0 bg-white dark:bg-[#1a1d24] border-r border-border overflow-y-auto z-40">
             <nav className="flex-1 p-4 space-y-1">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href ||

@@ -1,227 +1,140 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { DealCard } from "@/components/feed/DealCard";
-import { FoodSpotCard } from "@/components/feed/FoodSpotCard";
-import { EventCard } from "@/components/feed/EventCard";
-import { CountdownTimer } from "@/components/common/CountdownTimer";
-import {
-  TrendingUp,
-  Flame,
-  UtensilsCrossed,
-  MapPin,
-  Zap,
-  ArrowRight,
-  ShoppingBag,
-  CalendarDays,
-} from "lucide-react";
 import Link from "next/link";
-import { fetchDeals, fetchEvents, fetchFoodSpots } from "@/lib/client-api";
-import type { Deal, Event, FoodSpot } from "@/lib/types";
+import {
+  ArrowRight,
+  Clock3,
+  Flame,
+  MapPin,
+  ShoppingBag,
+  Sparkles,
+  UtensilsCrossed,
+} from "lucide-react";
+
+const modules = [
+  {
+    icon: ShoppingBag,
+    title: "Online Deals Hub",
+    description: "Amazon, Flipkart, Zepto and more with live expiry timers.",
+  },
+  {
+    icon: UtensilsCrossed,
+    title: "Food Spot Finder",
+    description: "Best dishes by area with map pins, photos and community votes.",
+  },
+  {
+    icon: MapPin,
+    title: "Neighbourhood Board",
+    description: "Local events, lost and found, services and alerts in your city.",
+  },
+  {
+    icon: Flame,
+    title: "Daily Trending",
+    description: "Top 5 deals, hottest food spots and the most active areas.",
+  },
+];
+
+const highlights = [
+  "Deal expiry alerts",
+  "Community verified deals",
+  "Savings tracker",
+  "Receipt proof upload",
+  "Weekly leaderboard",
+  "Map-based discovery",
+];
 
 export default function HomePage() {
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [spots, setSpots] = useState<FoodSpot[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [referenceTime, setReferenceTime] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setReferenceTime(Date.now());
-    }, 60000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    let active = true;
-
-    const loadData = async () => {
-      setLoading(true);
-      const [dealData, spotData, eventData] = await Promise.all([
-        fetchDeals({ sort: "hot", limit: 12, signal: controller.signal }),
-        fetchFoodSpots({ sort: "popular", limit: 9, signal: controller.signal }),
-        fetchEvents({ type: "event", limit: 8, signal: controller.signal }),
-      ]);
-
-      if (!active) return;
-
-      setDeals(dealData);
-      setSpots(spotData);
-      setEvents(eventData);
-      setLoading(false);
-    };
-
-    loadData().catch(() => {
-      if (!active) return;
-      setLoading(false);
-    });
-
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, []);
-
-  const flashDeals = useMemo(() => {
-    return deals
-      .filter((deal) => {
-        const hoursLeft = (new Date(deal.expiresAt).getTime() - referenceTime) / 3600000;
-        return hoursLeft > 0 && hoursLeft < 6;
-      })
-      .slice(0, 3);
-  }, [deals, referenceTime]);
-
-  const trendingDeals = useMemo(() => deals.slice(0, 4), [deals]);
-  const nearbySpots = useMemo(() => spots.slice(0, 3), [spots]);
-  const recentEvents = useMemo(() => events.slice(0, 2), [events]);
-
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
-      <div className="gradient-hero rounded-3xl p-6 md:p-8 text-white relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-5 h-5 text-yellow-300" />
-            <span className="text-sm font-bold text-yellow-200 uppercase tracking-widest">Flash Deals - Expiring Soon</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold font-[family-name:var(--font-heading)] mb-4">
-            Daily deals, food discoveries, and local updates in one place
+    <div className="hero-surface relative overflow-hidden">
+      <div className="pointer-events-none absolute -left-20 top-12 h-60 w-60 rounded-full bg-primary/25 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-5rem] top-40 h-72 w-72 rounded-full bg-secondary/25 blur-3xl" />
+
+      <section className="relative mx-auto max-w-6xl px-4 py-10 md:py-16">
+        <div className="glass-panel rounded-3xl p-6 md:p-10">
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/30 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-text-primary dark:border-white/20 dark:bg-white/10 dark:text-white">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            DealDost
+          </p>
+
+          <h1 className="mt-5 max-w-3xl text-3xl font-extrabold leading-tight text-text-primary dark:text-white md:text-5xl">
+            Daily deals, food picks, and local buzz in one place.
           </h1>
-          <div className="flex items-center gap-3 flex-wrap">
-            {flashDeals.map((deal) => (
-              <Link
-                key={deal.id}
-                href={`/deals/${deal.id}`}
-                className="flex items-center gap-3 bg-white/15 backdrop-blur-sm rounded-xl px-4 py-3 hover:bg-white/25 transition-colors"
-              >
-                <div className="text-sm">
-                  <p className="font-bold line-clamp-1">{deal.title.substring(0, 25)}...</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="font-bold text-yellow-200">Rs {deal.dealPrice}</span>
-                    <CountdownTimer expiresAt={deal.expiresAt} compact />
-                  </div>
-                </div>
-              </Link>
-            ))}
+
+          <p className="mt-4 max-w-2xl text-sm text-text-secondary dark:text-gray-300 md:text-base">
+            Apne sheher ki best discoveries, sorted by community.
+          </p>
+
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white gradient-primary shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
+            >
+              Get Started
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             <Link
               href="/deals"
-              className="flex items-center gap-2 px-5 py-3 bg-white text-primary rounded-xl font-bold text-sm hover:shadow-lg transition-all"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-white/70 px-5 py-2.5 text-sm font-semibold text-text-primary backdrop-blur hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
             >
-              View All Deals
-              <ArrowRight className="w-4 h-4" />
+              Explore Feed
             </Link>
           </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: "Active Deals", value: deals.length, icon: ShoppingBag, color: "text-primary" },
-          { label: "Food Spots", value: spots.length, icon: UtensilsCrossed, color: "text-orange-500" },
-          { label: "Events", value: events.length, icon: CalendarDays, color: "text-purple-500" },
-          { label: "Cities", value: 1, icon: MapPin, color: "text-secondary" },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-white dark:bg-[#1e2028] rounded-2xl p-4 border border-border dark:border-[#2a2d34] flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl bg-gray-100 dark:bg-[#2a2d34] ${stat.color}`}>
-              <stat.icon className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xl font-extrabold text-text-primary dark:text-white font-[family-name:var(--font-heading)]">
-                {stat.value}
+          <div className="mt-7 flex flex-wrap gap-2">
+            {highlights.map((item) => (
+              <span
+                key={item}
+                className="rounded-full border border-white/50 bg-white/40 px-3 py-1 text-xs font-medium text-text-secondary dark:border-white/20 dark:bg-white/10 dark:text-gray-300"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {modules.map((module) => (
+            <article
+              key={module.title}
+              className="glass-card rounded-2xl p-5 md:p-6"
+            >
+              <div className="mb-4 inline-flex rounded-xl bg-white/70 p-2.5 text-primary dark:bg-white/10">
+                <module.icon className="h-5 w-5" />
+              </div>
+              <h2 className="text-lg font-bold text-text-primary dark:text-white">
+                {module.title}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-text-secondary dark:text-gray-300">
+                {module.description}
               </p>
-              <p className="text-xs text-text-muted">{stat.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold font-[family-name:var(--font-heading)] text-text-primary dark:text-white">
-              Trending Deals
-            </h2>
-          </div>
-          <Link href="/deals" className="flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
-            See All <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="h-80 rounded-2xl border border-border bg-white dark:bg-[#1e2028] dark:border-[#2a2d34] skeleton-shimmer" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {trendingDeals.map((deal) => (
-              <DealCard key={deal.id} deal={deal} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <UtensilsCrossed className="w-5 h-5 text-orange-500" />
-            <h2 className="text-xl font-bold font-[family-name:var(--font-heading)] text-text-primary dark:text-white">
-              Best Food Spots
-            </h2>
-          </div>
-          <Link href="/food" className="flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
-            See All <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {nearbySpots.map((spot) => (
-            <FoodSpotCard key={spot.id} spot={spot} />
+            </article>
           ))}
         </div>
-      </section>
 
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-secondary" />
-            <h2 className="text-xl font-bold font-[family-name:var(--font-heading)] text-text-primary dark:text-white">
-              Neighbourhood Updates
-            </h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="glass-card rounded-2xl p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+              Real-time
+            </p>
+            <p className="mt-1 text-base font-bold text-text-primary dark:text-white">
+              Live upvotes and expiry timers
+            </p>
           </div>
-          <Link href="/neighbourhood" className="flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
-            See All <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {recentEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-white dark:bg-[#1e2028] rounded-2xl p-6 border border-border dark:border-[#2a2d34]">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-accent-green" />
-          <h2 className="text-lg font-bold font-[family-name:var(--font-heading)] text-text-primary dark:text-white">
-            Top Contributors This Week
-          </h2>
-        </div>
-        <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
-          {trendingDeals.map((deal, index) => (
-            <div key={deal.id} className="flex items-center gap-3 shrink-0">
-              <span className="text-lg font-extrabold text-text-muted">#{index + 1}</span>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white font-bold text-sm">
-                {deal.postedBy.name.charAt(0)}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-text-primary dark:text-white">{deal.postedBy.name}</p>
-                <p className="text-xs text-text-muted">{deal.upvotes} upvotes</p>
-              </div>
-            </div>
-          ))}
+          <div className="glass-card rounded-2xl p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+              Local-first
+            </p>
+            <p className="mt-1 text-base font-bold text-text-primary dark:text-white">
+              City and area level discovery
+            </p>
+          </div>
+          <div className="glass-card rounded-2xl p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+              Fast
+            </p>
+            <p className="mt-1 flex items-center gap-2 text-base font-bold text-text-primary dark:text-white">
+              <Clock3 className="h-4 w-4 text-primary" />
+              Built for daily check-ins
+            </p>
+          </div>
         </div>
       </section>
     </div>

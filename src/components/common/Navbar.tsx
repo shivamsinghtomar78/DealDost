@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Search, Bell, Moon, Sun, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
-import { useAuth } from "@/hooks/useAuth";
 
 function getInitialTheme() {
     if (typeof window === "undefined") {
@@ -22,7 +21,7 @@ function getInitialTheme() {
 export function Navbar() {
     const [darkMode, setDarkMode] = useState(getInitialTheme);
     const { user } = useAuthStore();
-    useAuth();
+    const isLoggedIn = Boolean(user);
 
     useEffect(() => {
         document.documentElement.classList.toggle("dark", darkMode);
@@ -42,23 +41,31 @@ export function Navbar() {
                     </span>
                 </Link>
 
-                <div className="hidden md:flex flex-1 max-w-xl mx-6">
-                    <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                        <input
-                            type="text"
-                            placeholder="Search deals, food spots, events..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-[#2a2d34] rounded-full text-sm border-0 outline-none focus:ring-2 focus:ring-primary/30 transition-all placeholder:text-text-muted"
-                        />
+                {isLoggedIn ? (
+                    <div className="hidden md:flex flex-1 max-w-xl mx-6">
+                        <div className="relative w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                            <input
+                                type="text"
+                                placeholder="Search deals, food spots, events..."
+                                className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-[#2a2d34] rounded-full text-sm border-0 outline-none focus:ring-2 focus:ring-primary/30 transition-all placeholder:text-text-muted"
+                            />
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <p className="hidden md:block text-sm text-text-muted font-medium">
+                        Daily deals, food spots and local discoveries.
+                    </p>
+                )}
 
                 <div className="flex items-center gap-2 lg:gap-3">
-                    <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-[#2a2d34] hover:bg-gray-200 dark:hover:bg-[#3a3d44] transition-colors text-sm">
-                        <MapPin className="w-3.5 h-3.5 text-primary" />
-                        <span className="font-medium text-text-primary dark:text-white">Delhi</span>
-                        <span className="text-text-muted hidden lg:inline">, Karol Bagh</span>
-                    </button>
+                    {isLoggedIn && (
+                        <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-[#2a2d34] hover:bg-gray-200 dark:hover:bg-[#3a3d44] transition-colors text-sm">
+                            <MapPin className="w-3.5 h-3.5 text-primary" />
+                            <span className="font-medium text-text-primary dark:text-white">Delhi</span>
+                            <span className="text-text-muted hidden lg:inline">, Karol Bagh</span>
+                        </button>
+                    )}
 
                     <button
                         onClick={toggleDark}
@@ -72,29 +79,50 @@ export function Navbar() {
                         )}
                     </button>
 
-                    <button className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a2d34] transition-colors" aria-label="Notifications">
-                        <Bell className="w-5 h-5 text-text-secondary dark:text-gray-400" />
-                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-accent-red rounded-full pulse-dot" />
-                    </button>
+                    {isLoggedIn ? (
+                        <>
+                            <button className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a2d34] transition-colors" aria-label="Notifications">
+                                <Bell className="w-5 h-5 text-text-secondary dark:text-gray-400" />
+                                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-accent-red rounded-full pulse-dot" />
+                            </button>
 
-                    <Link href="/profile" className="shrink-0" aria-label="Profile">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white font-bold text-sm overflow-hidden ring-2 ring-white dark:ring-[#1a1d24] shadow-md">
-                            {user?.name?.charAt(0) || "U"}
-                        </div>
-                    </Link>
+                            <Link href="/profile" className="shrink-0" aria-label="Profile">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white font-bold text-sm overflow-hidden ring-2 ring-white dark:ring-[#1a1d24] shadow-md">
+                                    {user?.name?.charAt(0) || "U"}
+                                </div>
+                            </Link>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/login"
+                                className="px-4 py-2 text-sm font-semibold rounded-full border border-border text-text-primary dark:text-white hover:bg-gray-100 dark:hover:bg-[#2a2d34] transition-colors"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                href="/login?mode=signup"
+                                className="px-4 py-2 text-sm font-semibold rounded-full text-white gradient-primary hover:opacity-90 transition-opacity"
+                            >
+                                Sign up
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
 
-            <div className="md:hidden px-4 pb-3 bg-white dark:bg-[#1a1d24] border-b border-border">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                    <input
-                        type="text"
-                        placeholder="Search deals, food, events..."
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-[#2a2d34] rounded-full text-sm border-0 outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-                    />
+            {isLoggedIn && (
+                <div className="md:hidden px-4 pb-3 bg-white dark:bg-[#1a1d24] border-b border-border">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                        <input
+                            type="text"
+                            placeholder="Search deals, food, events..."
+                            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-[#2a2d34] rounded-full text-sm border-0 outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                        />
+                    </div>
                 </div>
-            </div>
+            )}
         </nav>
     );
 }

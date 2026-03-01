@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/common/Navbar";
-import { Sidebar } from "@/components/common/Sidebar";
-import { BottomNav } from "@/components/common/BottomNav";
+import { AppShell } from "@/components/common/AppShell";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,14 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-bg-main antialiased">
-        <Navbar />
-        <div className="flex pt-16">
-          <Sidebar />
-          <main className="flex-1 ml-0 lg:ml-64 min-h-[calc(100vh-4rem)] pb-20 lg:pb-0">
-            {children}
-          </main>
-        </div>
-        <BottomNav />
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

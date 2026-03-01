@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Home, ShoppingCart, UtensilsCrossed, MapPin, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useAuthStore } from "@/store/authStore";
 
 const tabs = [
     { href: "/", label: "Home", icon: Home },
@@ -16,6 +17,8 @@ const tabs = [
 
 export function BottomNav() {
     const pathname = usePathname();
+    const { user } = useAuthStore();
+    if (!user) return null;
 
     return (
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-[#1a1d24]/90 backdrop-blur-xl border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
