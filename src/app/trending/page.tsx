@@ -5,7 +5,7 @@ import { DealCard } from "@/components/feed/DealCard";
 import { FoodSpotCard } from "@/components/feed/FoodSpotCard";
 import { Flame, Trophy, UtensilsCrossed, Zap } from "lucide-react";
 import { fetchDeals, fetchFoodSpots } from "@/lib/client-api";
-import type { Deal, FoodSpot } from "@/lib/mock-data";
+import type { Deal, FoodSpot } from "@/lib/types";
 
 export default function TrendingPage() {
     const [deals, setDeals] = useState<Deal[]>([]);

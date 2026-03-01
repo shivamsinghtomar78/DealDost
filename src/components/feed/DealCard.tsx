@@ -8,7 +8,7 @@ import { PlatformBadge } from "@/components/common/PlatformBadge";
 import { CountdownTimer } from "@/components/common/CountdownTimer";
 import { UpvoteButton } from "@/components/common/UpvoteButton";
 import { SaveButton, ShareButton, GetDealButton } from "@/components/common/ActionButtons";
-import type { Deal } from "@/lib/mock-data";
+import type { Deal } from "@/lib/types";
 
 export function DealCard({ deal }: { deal: Deal }) {
     return (
@@ -89,7 +89,7 @@ export function DealCard({ deal }: { deal: Deal }) {
                         {deal.postedBy.name.charAt(0)}
                     </div>
                     <span>by @{deal.postedBy.username}</span>
-                    <span>•</span>
+                    <span>â€¢</span>
                     <span>{timeAgo(deal.createdAt)}</span>
                     <span className="ml-auto flex items-center gap-1">
                         <MessageCircle className="w-3 h-3" />

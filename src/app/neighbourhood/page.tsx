@@ -5,7 +5,7 @@ import { EventCard } from "@/components/feed/EventCard";
 import { cn } from "@/lib/utils";
 import { MapPin, Search } from "lucide-react";
 import { fetchEvents } from "@/lib/client-api";
-import type { Event } from "@/lib/mock-data";
+import type { Event } from "@/lib/types";
 
 const TABS = [
     { id: "events", label: "Events" },

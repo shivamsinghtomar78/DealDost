@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { FoodSpotCard } from "@/components/feed/FoodSpotCard";
 import { fetchFoodSpots } from "@/lib/client-api";
-import type { FoodSpot } from "@/lib/mock-data";
+import type { FoodSpot } from "@/lib/types";
 
 export default function DishFoodSpotsPage() {
     const params = useParams<{ dish: string }>();

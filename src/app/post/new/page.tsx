@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { PLATFORMS, DISH_CATEGORIES } from "@/lib/mock-data";
+import { DEAL_PLATFORMS, FOOD_DISH_CATEGORIES } from "@/lib/constants";
 import { DEAL_CATEGORIES } from "@/lib/utils";
 import { PlusCircle, ShoppingCart, UtensilsCrossed, Calendar, Image as ImageIcon, Link as LinkIcon, MapPin, Clock, Tag, IndianRupee } from "lucide-react";
 
 type PostType = "deal" | "food_spot" | "event";
 
 const POST_TYPES = [
-    { id: "deal" as PostType, label: "🛒 Deal", desc: "Share an online deal", icon: ShoppingCart, color: "from-primary to-primary-light" },
-    { id: "food_spot" as PostType, label: "🍜 Food Spot", desc: "Recommend a food place", icon: UtensilsCrossed, color: "from-orange-400 to-orange-600" },
-    { id: "event" as PostType, label: "📍 Event / Post", desc: "Post an event or update", icon: Calendar, color: "from-secondary to-secondary-light" },
+    { id: "deal" as PostType, label: "ðŸ›’ Deal", desc: "Share an online deal", icon: ShoppingCart, color: "from-primary to-primary-light" },
+    { id: "food_spot" as PostType, label: "ðŸœ Food Spot", desc: "Recommend a food place", icon: UtensilsCrossed, color: "from-orange-400 to-orange-600" },
+    { id: "event" as PostType, label: "ðŸ“ Event / Post", desc: "Post an event or update", icon: Calendar, color: "from-secondary to-secondary-light" },
 ];
 
 export default function PostNewPage() {
@@ -55,16 +55,16 @@ export default function PostNewPage() {
             {/* Deal Form */}
             {type === "deal" && (
                 <div className="bg-white dark:bg-[#1e2028] rounded-2xl p-6 border border-border dark:border-[#2a2d34] space-y-4">
-                    <h2 className="font-bold text-lg">🛒 Post a Deal</h2>
+                    <h2 className="font-bold text-lg">ðŸ›’ Post a Deal</h2>
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Product Title</label>
-                            <input className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="e.g. Amul Butter 500g — Fresh Stock!" />
+                            <input className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="e.g. Amul Butter 500g â€” Fresh Stock!" />
                         </div>
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Platform</label>
                             <div className="flex flex-wrap gap-2">
-                                {PLATFORMS.filter((p) => p.name !== "All").map((p) => (
+                                {DEAL_PLATFORMS.filter((p) => p.name !== "All").map((p) => (
                                     <button key={p.name} className="px-3 py-1.5 rounded-full border border-border dark:border-[#3a3d44] text-sm font-medium hover:border-primary/50 transition-all" style={{ borderColor: "transparent" }}>
                                         <span className="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style={{ backgroundColor: p.color }} />
                                         {p.name}
@@ -77,13 +77,13 @@ export default function PostNewPage() {
                                 <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">
                                     <IndianRupee className="w-3.5 h-3.5 inline" /> Original Price
                                 </label>
-                                <input type="number" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="₹120" />
+                                <input type="number" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="â‚¹120" />
                             </div>
                             <div>
                                 <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">
                                     <IndianRupee className="w-3.5 h-3.5 inline" /> Deal Price
                                 </label>
-                                <input type="number" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="₹89" />
+                                <input type="number" className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="â‚¹89" />
                             </div>
                         </div>
                         <div>
@@ -124,7 +124,7 @@ export default function PostNewPage() {
                             <textarea rows={3} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none" placeholder="Why is this a great deal? Add details..." />
                         </div>
                         <button className="w-full py-3 rounded-xl font-bold text-white gradient-primary hover:opacity-90 transition-opacity shadow-lg shadow-primary/25 text-sm">
-                            🚀 Post Deal
+                            ðŸš€ Post Deal
                         </button>
                     </div>
                 </div>
@@ -133,7 +133,7 @@ export default function PostNewPage() {
             {/* Food Spot Form */}
             {type === "food_spot" && (
                 <div className="bg-white dark:bg-[#1e2028] rounded-2xl p-6 border border-border dark:border-[#2a2d34] space-y-4">
-                    <h2 className="font-bold text-lg">🍜 Recommend a Food Spot</h2>
+                    <h2 className="font-bold text-lg">ðŸœ Recommend a Food Spot</h2>
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Place Name</label>
@@ -142,7 +142,7 @@ export default function PostNewPage() {
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Dish Name</label>
                             <div className="flex flex-wrap gap-2">
-                                {DISH_CATEGORIES.filter((d) => d.name !== "All").map((d) => (
+                                {FOOD_DISH_CATEGORIES.filter((d) => d.name !== "All").map((d) => (
                                     <button key={d.name} className="px-3 py-1.5 rounded-full border border-border dark:border-[#3a3d44] text-sm font-medium hover:border-primary/50 hover:bg-primary/5 transition-all">
                                         {d.emoji} {d.name}
                                     </button>
@@ -154,7 +154,7 @@ export default function PostNewPage() {
                                 <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">
                                     <IndianRupee className="w-3.5 h-3.5 inline" /> Price Range
                                 </label>
-                                <input className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="₹40-₹80" />
+                                <input className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="â‚¹40-â‚¹80" />
                             </div>
                             <div>
                                 <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">
@@ -195,7 +195,7 @@ export default function PostNewPage() {
                             <textarea rows={3} className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none" placeholder="Tell us about the taste, ambiance, speciality..." />
                         </div>
                         <button className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-orange-400 to-orange-600 hover:opacity-90 transition-opacity shadow-lg shadow-orange-500/25 text-sm">
-                            🍜 Post Food Spot
+                            ðŸœ Post Food Spot
                         </button>
                     </div>
                 </div>
@@ -204,7 +204,7 @@ export default function PostNewPage() {
             {/* Event Form */}
             {type === "event" && (
                 <div className="bg-white dark:bg-[#1e2028] rounded-2xl p-6 border border-border dark:border-[#2a2d34] space-y-4">
-                    <h2 className="font-bold text-lg">📍 Post Event / Update</h2>
+                    <h2 className="font-bold text-lg">ðŸ“ Post Event / Update</h2>
                     <div className="space-y-4">
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Title</label>
@@ -222,7 +222,7 @@ export default function PostNewPage() {
                         </div>
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Entry Fee</label>
-                            <input className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="Free Entry or ₹200" />
+                            <input className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-[#2a2d34] border border-border dark:border-[#3a3d44] outline-none focus:ring-2 focus:ring-primary/30 text-sm" placeholder="Free Entry or â‚¹200" />
                         </div>
                         <div>
                             <label className="text-sm font-semibold text-text-primary dark:text-white block mb-1.5">Description</label>
@@ -240,7 +240,7 @@ export default function PostNewPage() {
                             </div>
                         </div>
                         <button className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-secondary to-secondary-light hover:opacity-90 transition-opacity shadow-lg shadow-secondary/25 text-sm">
-                            📍 Post Event
+                            ðŸ“ Post Event
                         </button>
                     </div>
                 </div>

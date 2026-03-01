@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { PLATFORMS } from "@/lib/mock-data";
+import { DEAL_PLATFORMS } from "@/lib/constants";
 import { DEAL_CATEGORIES } from "@/lib/utils";
 import { DealCard } from "@/components/feed/DealCard";
 import { cn } from "@/lib/utils";
 import { ShoppingCart, Zap, Search } from "lucide-react";
 import { fetchDeals } from "@/lib/client-api";
-import type { Deal } from "@/lib/mock-data";
+import type { Deal } from "@/lib/types";
 
 export default function DealsPage() {
     const [platform, setPlatform] = useState("All");
@@ -85,7 +85,7 @@ export default function DealsPage() {
                 </div>
                 <p className="text-sm text-text-secondary">
                     Community-curated deals across India
-                    <span className="font-semibold text-primary"> Â· {filtered.length} active</span>
+                    <span className="font-semibold text-primary"> Ã‚Â· {filtered.length} active</span>
                 </p>
             </div>
 
@@ -100,7 +100,7 @@ export default function DealsPage() {
             </div>
 
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
-                {PLATFORMS.map((p) => (
+                {DEAL_PLATFORMS.map((p) => (
                     <button
                         key={p.name}
                         onClick={() => setPlatform(p.name)}

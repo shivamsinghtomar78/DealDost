@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { fetchUserByUid } from "@/lib/client-api";
+import { useAuthStore } from "@/store/authStore";
 
 interface UseAuthState {
     user: User | null;
@@ -12,6 +14,7 @@ interface UseAuthState {
 export function useAuth(): UseAuthState {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const setStoreUser = useAuthStore((state) => state.setUser);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (nextUser) => {
@@ -31,11 +34,18 @@ export function useAuth(): UseAuthState {
                 }).catch(() => {
                     // Non-blocking best-effort sync.
                 });
+
+                const profile = await fetchUserByUid(nextUser.uid).catch(() => null);
+                if (profile) {
+                    setStoreUser(profile);
+                }
+            } else {
+                setStoreUser(null);
             }
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [setStoreUser]);
 
     return { user, loading };
 }

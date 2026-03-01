@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search, Bell, Moon, Sun, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
+import { useAuth } from "@/hooks/useAuth";
 
 function getInitialTheme() {
     if (typeof window === "undefined") {
@@ -21,6 +22,7 @@ function getInitialTheme() {
 export function Navbar() {
     const [darkMode, setDarkMode] = useState(getInitialTheme);
     const { user } = useAuthStore();
+    useAuth();
 
     useEffect(() => {
         document.documentElement.classList.toggle("dark", darkMode);

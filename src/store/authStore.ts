@@ -1,16 +1,18 @@
 "use client";
 
 import { create } from "zustand";
-import { MOCK_USER } from "@/lib/mock-data";
+import { persist } from "zustand/middleware";
+import type { AppUser } from "@/lib/types";
 
 interface AuthState {
-    user: typeof MOCK_USER | null;
+    user: AppUser | null;
     isLoggedIn: boolean;
     savedDeals: string[];
     savedFoodSpots: string[];
     upvotedPosts: string[];
 
-    login: () => void;
+    setUser: (user: AppUser | null) => void;
+    login: (user: AppUser) => void;
     logout: () => void;
     toggleSaveDeal: (dealId: string) => void;
     toggleSaveFoodSpot: (spotId: string) => void;
@@ -19,41 +21,74 @@ interface AuthState {
     isUpvoted: (id: string) => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-    user: MOCK_USER,
-    isLoggedIn: true,
-    savedDeals: [...MOCK_USER.savedDeals],
-    savedFoodSpots: [...MOCK_USER.savedFoodSpots],
-    upvotedPosts: [],
+const initialState = {
+    user: null as AppUser | null,
+    isLoggedIn: false,
+    savedDeals: [] as string[],
+    savedFoodSpots: [] as string[],
+    upvotedPosts: [] as string[],
+};
 
-    login: () => set({ user: MOCK_USER, isLoggedIn: true }),
-    logout: () => set({ user: null, isLoggedIn: false, savedDeals: [], savedFoodSpots: [], upvotedPosts: [] }),
+export const useAuthStore = create<AuthState>()(
+    persist(
+        (set, get) => ({
+            ...initialState,
 
-    toggleSaveDeal: (dealId) =>
-        set((state) => ({
-            savedDeals: state.savedDeals.includes(dealId)
-                ? state.savedDeals.filter((id) => id !== dealId)
-                : [...state.savedDeals, dealId],
-        })),
+            setUser: (user) =>
+                set({
+                    user,
+                    isLoggedIn: Boolean(user),
+                    savedDeals: user?.savedDeals ?? [],
+                    savedFoodSpots: user?.savedFoodSpots ?? [],
+                }),
 
-    toggleSaveFoodSpot: (spotId) =>
-        set((state) => ({
-            savedFoodSpots: state.savedFoodSpots.includes(spotId)
-                ? state.savedFoodSpots.filter((id) => id !== spotId)
-                : [...state.savedFoodSpots, spotId],
-        })),
+            login: (user) =>
+                set({
+                    user,
+                    isLoggedIn: true,
+                    savedDeals: user.savedDeals ?? [],
+                    savedFoodSpots: user.savedFoodSpots ?? [],
+                }),
 
-    toggleUpvote: (postId) =>
-        set((state) => ({
-            upvotedPosts: state.upvotedPosts.includes(postId)
-                ? state.upvotedPosts.filter((id) => id !== postId)
-                : [...state.upvotedPosts, postId],
-        })),
+            logout: () => set(initialState),
 
-    isSaved: (id) => {
-        const state = get();
-        return state.savedDeals.includes(id) || state.savedFoodSpots.includes(id);
-    },
+            toggleSaveDeal: (dealId) =>
+                set((state) => ({
+                    savedDeals: state.savedDeals.includes(dealId)
+                        ? state.savedDeals.filter((id) => id !== dealId)
+                        : [...state.savedDeals, dealId],
+                })),
 
-    isUpvoted: (id) => get().upvotedPosts.includes(id),
-}));
+            toggleSaveFoodSpot: (spotId) =>
+                set((state) => ({
+                    savedFoodSpots: state.savedFoodSpots.includes(spotId)
+                        ? state.savedFoodSpots.filter((id) => id !== spotId)
+                        : [...state.savedFoodSpots, spotId],
+                })),
+
+            toggleUpvote: (postId) =>
+                set((state) => ({
+                    upvotedPosts: state.upvotedPosts.includes(postId)
+                        ? state.upvotedPosts.filter((id) => id !== postId)
+                        : [...state.upvotedPosts, postId],
+                })),
+
+            isSaved: (id) => {
+                const state = get();
+                return state.savedDeals.includes(id) || state.savedFoodSpots.includes(id);
+            },
+
+            isUpvoted: (id) => get().upvotedPosts.includes(id),
+        }),
+        {
+            name: "dealdost-auth",
+            partialize: (state) => ({
+                user: state.user,
+                isLoggedIn: state.isLoggedIn,
+                savedDeals: state.savedDeals,
+                savedFoodSpots: state.savedFoodSpots,
+                upvotedPosts: state.upvotedPosts,
+            }),
+        }
+    )
+);

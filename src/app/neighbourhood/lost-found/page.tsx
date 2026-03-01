@@ -3,7 +3,7 @@
 import { EventCard } from "@/components/feed/EventCard";
 import { fetchEvents } from "@/lib/client-api";
 import { useEffect, useState } from "react";
-import type { Event } from "@/lib/mock-data";
+import type { Event } from "@/lib/types";
 
 export default function LostFoundPage() {
     const [posts, setPosts] = useState<Event[]>([]);

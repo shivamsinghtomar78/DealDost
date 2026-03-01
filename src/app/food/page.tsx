@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { DISH_CATEGORIES } from "@/lib/mock-data";
+import { FOOD_DISH_CATEGORIES } from "@/lib/constants";
 import { FoodSpotCard } from "@/components/feed/FoodSpotCard";
 import { cn } from "@/lib/utils";
 import { UtensilsCrossed, List, Map, Search, ArrowRight } from "lucide-react";
 import { fetchFoodSpots } from "@/lib/client-api";
-import type { FoodSpot } from "@/lib/mock-data";
+import type { FoodSpot } from "@/lib/types";
 
 const AREAS = ["All", "North Campus", "Karol Bagh", "Chandni Chowk", "Saket", "Hauz Khas", "Connaught Place", "Lajpat Nagar", "Pitampura"];
 const PRICE_RANGES = ["All", "Under Rs 50", "Rs 50-150", "Rs 150-300", "Rs 300+"];
@@ -130,7 +130,7 @@ export default function FoodPage() {
             </div>
 
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
-                {DISH_CATEGORIES.map((cat) => (
+                {FOOD_DISH_CATEGORIES.map((cat) => (
                     <button
                         key={cat.name}
                         onClick={() => setDish(cat.name)}

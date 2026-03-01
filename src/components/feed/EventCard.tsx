@@ -4,13 +4,13 @@ import Image from "next/image";
 import { Calendar, MapPin, Tag, Users, Share2, AlertTriangle, Wrench, Search } from "lucide-react";
 import { UpvoteButton } from "@/components/common/UpvoteButton";
 import { timeAgo, cn } from "@/lib/utils";
-import type { Event } from "@/lib/mock-data";
+import type { Event } from "@/lib/types";
 
 const typeConfig: Record<string, { label: string; icon: React.ElementType; color: string; bgColor: string }> = {
-    event: { label: "🎉 Event", icon: Calendar, color: "text-purple-600", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
-    lost_found: { label: "🔍 Lost & Found", icon: Search, color: "text-orange-600", bgColor: "bg-orange-100 dark:bg-orange-900/30" },
-    service: { label: "🔧 Service", icon: Wrench, color: "text-blue-600", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
-    alert: { label: "⚠️ Alert", icon: AlertTriangle, color: "text-red-600", bgColor: "bg-red-100 dark:bg-red-900/30" },
+    event: { label: "ðŸŽ‰ Event", icon: Calendar, color: "text-purple-600", bgColor: "bg-purple-100 dark:bg-purple-900/30" },
+    lost_found: { label: "ðŸ” Lost & Found", icon: Search, color: "text-orange-600", bgColor: "bg-orange-100 dark:bg-orange-900/30" },
+    service: { label: "ðŸ”§ Service", icon: Wrench, color: "text-blue-600", bgColor: "bg-blue-100 dark:bg-blue-900/30" },
+    alert: { label: "âš ï¸ Alert", icon: AlertTriangle, color: "text-red-600", bgColor: "bg-red-100 dark:bg-red-900/30" },
 };
 
 export function EventCard({ event }: { event: Event }) {
@@ -72,7 +72,7 @@ export function EventCard({ event }: { event: Event }) {
                 {/* Footer */}
                 <div className="flex items-center gap-2 text-xs text-text-muted">
                     <span>by @{event.postedBy.username}</span>
-                    <span>•</span>
+                    <span>â€¢</span>
                     <span>{timeAgo(event.createdAt)}</span>
                 </div>
             </div>

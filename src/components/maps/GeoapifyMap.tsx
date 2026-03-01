@@ -22,7 +22,7 @@ interface GeoapifyMapProps {
 }
 
 // Fix Leaflet default marker icon issue in Next.js
-const createIcon = (emoji: string = "📍") => {
+const createIcon = (emoji: string = "ðŸ“") => {
     return L.divIcon({
         className: "geoapify-marker",
         html: `<div style="font-size: 28px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: pointer;">${emoji}</div>`,
@@ -64,14 +64,14 @@ export default function GeoapifyMap({
 
         L.tileLayer(isRetina ? retinaUrl : baseUrl, {
             attribution:
-                'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap</a>',
+                'Powered by <a href="https://www.geoapify.com/" target="_blank">Geoapify</a> | <a href="https://openmaptiles.org/" target="_blank">Â© OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">Â© OpenStreetMap</a>',
             maxZoom: 20,
         }).addTo(map);
 
         // Add markers
         if (markers.length > 0) {
             markers.forEach((m) => {
-                const icon = createIcon(m.emoji || "📍");
+                const icon = createIcon(m.emoji || "ðŸ“");
                 const marker = L.marker([m.lat, m.lng], { icon }).addTo(map);
 
                 if (m.title) {
@@ -85,7 +85,7 @@ export default function GeoapifyMap({
             });
         } else {
             // Single center marker
-            const icon = createIcon("📍");
+            const icon = createIcon("ðŸ“");
             L.marker([center.lat, center.lng], { icon }).addTo(map);
         }
 
@@ -113,7 +113,7 @@ export default function GeoapifyMap({
                         onClick={openInMaps}
                         className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                     >
-                        🧭 Get Directions
+                        ðŸ§­ Get Directions
                     </button>
                 </div>
             )}

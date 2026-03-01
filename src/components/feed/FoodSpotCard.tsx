@@ -6,7 +6,7 @@ import { MapPin, Clock, Star, Navigation, Camera, Users } from "lucide-react";
 import { timeAgo, DISH_EMOJIS } from "@/lib/utils";
 import { UpvoteButton } from "@/components/common/UpvoteButton";
 import { SaveButton } from "@/components/common/ActionButtons";
-import type { FoodSpot } from "@/lib/mock-data";
+import type { FoodSpot } from "@/lib/types";
 
 export function FoodSpotCard({ spot }: { spot: FoodSpot }) {
     const badge = DISH_EMOJIS[spot.dishCategory] || "FS";
@@ -104,7 +104,7 @@ export function FoodSpotCard({ spot }: { spot: FoodSpot }) {
                         {spot.postedBy.name.charAt(0)}
                     </div>
                     <span>by @{spot.postedBy.username}</span>
-                    <span>Â·</span>
+                    <span>Ã‚Â·</span>
                     <span>{timeAgo(spot.createdAt)}</span>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-import type { Deal, Event, FoodSpot } from "@/lib/mock-data";
+import type { Deal, Event, FoodSpot } from "@/lib/types";
 
 type UnknownDoc = Record<string, unknown>;
 

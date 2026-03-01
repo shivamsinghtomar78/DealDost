@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { fetchDeals, fetchEvents, fetchFoodSpots } from "@/lib/client-api";
-import type { Deal, Event, FoodSpot } from "@/lib/mock-data";
+import type { Deal, Event, FoodSpot } from "@/lib/types";
 
 export default function HomePage() {
   const [deals, setDeals] = useState<Deal[]>([]);

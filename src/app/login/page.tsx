@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { auth, googleProvider } from "@/lib/firebase";
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { ShoppingBag, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, Flame, MapPin, UtensilsCrossed, TrendingUp } from "lucide-react";
+import { ShoppingBag, Mail, Lock, Eye, EyeOff, ArrowRight, MapPin, UtensilsCrossed, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -70,12 +70,12 @@ export default function LoginPage() {
         { icon: ShoppingBag, value: "10,000+", label: "Deals Shared" },
         { icon: UtensilsCrossed, value: "5,000+", label: "Food Spots" },
         { icon: MapPin, value: "28", label: "Cities" },
-        { icon: TrendingUp, value: "₹50L+", label: "Saved by Users" },
+        { icon: TrendingUp, value: "â‚¹50L+", label: "Saved by Users" },
     ];
 
     return (
         <div className="min-h-screen flex">
-            {/* Left — Hero Branding */}
+            {/* Left â€” Hero Branding */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#FF5722] via-[#FF6D3A] to-[#FF8A65]">
                 <div className="absolute inset-0 opacity-10">
                     {[...Array(20)].map((_, i) => (
@@ -86,7 +86,7 @@ export default function LoginPage() {
                             animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
                             transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            {["🛒", "🍜", "🔥", "💰", "🎉", "🥟", "📱", "⭐"][i % 8]}
+                            {["ðŸ›’", "ðŸœ", "ðŸ”¥", "ðŸ’°", "ðŸŽ‰", "ðŸ¥Ÿ", "ðŸ“±", "â­"][i % 8]}
                         </motion.div>
                     ))}
                 </div>
@@ -104,7 +104,7 @@ export default function LoginPage() {
                             Apne sheher ki best deals, khana aur events
                         </h1>
                         <p className="text-xl text-white/80 mb-8">
-                            — sab ek jagah 🇮🇳
+                            â€” sab ek jagah ðŸ‡®ðŸ‡³
                         </p>
 
                         <div className="grid grid-cols-2 gap-4 mb-8">
@@ -123,15 +123,15 @@ export default function LoginPage() {
 
                         <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
                             <p className="text-sm italic text-white/90">
-                                &ldquo;Saved ₹12,450 this month! DealDost is pure gold for budget shoppers.&rdquo;
+                                &ldquo;Saved â‚¹12,450 this month! DealDost is pure gold for budget shoppers.&rdquo;
                             </p>
-                            <p className="text-xs text-white/60 mt-2">— @shivam_deals, Top Contributor</p>
+                            <p className="text-xs text-white/60 mt-2">â€” @shivam_deals, Top Contributor</p>
                         </div>
                     </motion.div>
                 </div>
             </div>
 
-            {/* Right — Login Form */}
+            {/* Right â€” Login Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center bg-white dark:bg-[#111318] px-6 py-12">
                 <motion.div
                     className="w-full max-w-md"
@@ -268,7 +268,7 @@ export default function LoginPage() {
                     </p>
 
                     <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-                        Made with ❤️ in India
+                        Made with â¤ï¸ in India
                     </p>
                 </motion.div>
             </div>

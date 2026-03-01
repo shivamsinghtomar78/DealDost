@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { DealCard } from "@/components/feed/DealCard";
 import { fetchDeals } from "@/lib/client-api";
-import type { Deal } from "@/lib/mock-data";
+import type { Deal } from "@/lib/types";
 
 export default function PlatformDealsPage() {
     const params = useParams<{ platform: string }>();
