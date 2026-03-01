@@ -6,7 +6,6 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
 } from "firebase/auth";
 import {
   ShoppingBag,
@@ -20,11 +19,12 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 
 export default function LoginPage() {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,15 +42,12 @@ export default function LoginPage() {
     }
   }, []);
 
+  // Redirect to home only when the app has fully synced the user profile
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        router.replace("/");
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
+    if (user) {
+      router.replace("/");
+    }
+  }, [user, router]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
