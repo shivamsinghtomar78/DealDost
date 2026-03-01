@@ -1,0 +1,277 @@
+"use client";
+
+import { useState } from "react";
+import { auth, googleProvider } from "@/lib/firebase";
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { ShoppingBag, Mail, Lock, Phone, Eye, EyeOff, ArrowRight, Flame, MapPin, UtensilsCrossed, TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+
+export default function LoginPage() {
+    const [mode, setMode] = useState<"login" | "signup">("login");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const handleGoogleLogin = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const result = await signInWithPopup(auth, googleProvider);
+            // Upsert user in MongoDB
+            await fetch("/api/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    firebaseUid: result.user.uid,
+                    name: result.user.displayName || "DealDost User",
+                    email: result.user.email,
+                    avatarUrl: result.user.photoURL || "",
+                }),
+            });
+            window.location.href = "/";
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Google login failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEmailAuth = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+        try {
+            const fn = mode === "login" ? signInWithEmailAndPassword : createUserWithEmailAndPassword;
+            const result = await fn(auth, email, password);
+            if (mode === "signup") {
+                await fetch("/api/users", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        firebaseUid: result.user.uid,
+                        name: email.split("@")[0],
+                        email: result.user.email,
+                        avatarUrl: "",
+                    }),
+                });
+            }
+            window.location.href = "/";
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Authentication failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const stats = [
+        { icon: ShoppingBag, value: "10,000+", label: "Deals Shared" },
+        { icon: UtensilsCrossed, value: "5,000+", label: "Food Spots" },
+        { icon: MapPin, value: "28", label: "Cities" },
+        { icon: TrendingUp, value: "₹50L+", label: "Saved by Users" },
+    ];
+
+    return (
+        <div className="min-h-screen flex">
+            {/* Left — Hero Branding */}
+            <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#FF5722] via-[#FF6D3A] to-[#FF8A65]">
+                <div className="absolute inset-0 opacity-10">
+                    {[...Array(20)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className="absolute text-3xl"
+                            style={{ left: `${(i * 17) % 100}%`, top: `${(i * 23) % 100}%` }}
+                            animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
+                            transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            {["🛒", "🍜", "🔥", "💰", "🎉", "🥟", "📱", "⭐"][i % 8]}
+                        </motion.div>
+                    ))}
+                </div>
+
+                <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+                                <ShoppingBag className="w-8 h-8 text-white" />
+                            </div>
+                            <span className="text-3xl font-extrabold font-[family-name:var(--font-heading)]">DealDost</span>
+                        </div>
+
+                        <h1 className="text-4xl xl:text-5xl font-extrabold leading-tight font-[family-name:var(--font-heading)] mb-4">
+                            Apne sheher ki best deals, khana aur events
+                        </h1>
+                        <p className="text-xl text-white/80 mb-8">
+                            — sab ek jagah 🇮🇳
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            {stats.map((stat) => (
+                                <motion.div
+                                    key={stat.label}
+                                    className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
+                                    whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.15)" }}
+                                >
+                                    <stat.icon className="w-5 h-5 mb-2 text-white/80" />
+                                    <p className="text-2xl font-extrabold">{stat.value}</p>
+                                    <p className="text-sm text-white/70">{stat.label}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <div className="bg-white/10 backdrop-blur rounded-xl p-4 border border-white/10">
+                            <p className="text-sm italic text-white/90">
+                                &ldquo;Saved ₹12,450 this month! DealDost is pure gold for budget shoppers.&rdquo;
+                            </p>
+                            <p className="text-xs text-white/60 mt-2">— @shivam_deals, Top Contributor</p>
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
+
+            {/* Right — Login Form */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center bg-white dark:bg-[#111318] px-6 py-12">
+                <motion.div
+                    className="w-full max-w-md"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    {/* Mobile logo */}
+                    <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#FF5722] to-[#FF8A65] rounded-xl flex items-center justify-center">
+                            <ShoppingBag className="w-6 h-6 text-white" />
+                        </div>
+                        <span className="text-2xl font-extrabold text-[#FF5722] font-[family-name:var(--font-heading)]">DealDost</span>
+                    </div>
+
+                    <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white font-[family-name:var(--font-heading)]">
+                        {mode === "login" ? "Welcome back!" : "Join DealDost"}
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-2 mb-8">
+                        {mode === "login"
+                            ? "Sign in to discover today's best deals"
+                            : "India's #1 community for deals & food discovery"}
+                    </p>
+
+                    {error && (
+                        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm mb-6">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Google Button */}
+                    <button
+                        onClick={handleGoogleLogin}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center gap-3 bg-white dark:bg-[#1e2028] border-2 border-gray-200 dark:border-[#2a2d34] rounded-xl px-6 py-3.5 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-[#2a2d34] transition-all shadow-sm hover:shadow-md"
+                    >
+                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <div className="flex items-center gap-3 my-6">
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-[#2a2d34]" />
+                        <span className="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wider">or continue with email</span>
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-[#2a2d34]" />
+                    </div>
+
+                    {/* Email Form */}
+                    <form onSubmit={handleEmailAuth} className="space-y-4">
+                        <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Email address"
+                                required
+                                className="w-full pl-12 pr-4 py-3.5 rounded-xl border-2 border-gray-200 dark:border-[#2a2d34] bg-gray-50 dark:bg-[#1e2028] text-gray-900 dark:text-white focus:border-[#FF5722] focus:ring-0 outline-none transition-colors"
+                            />
+                        </div>
+
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Password"
+                                required
+                                minLength={6}
+                                className="w-full pl-12 pr-12 py-3.5 rounded-xl border-2 border-gray-200 dark:border-[#2a2d34] bg-gray-50 dark:bg-[#1e2028] text-gray-900 dark:text-white focus:border-[#FF5722] focus:ring-0 outline-none transition-colors"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+
+                        {mode === "login" && (
+                            <div className="text-right">
+                                <button type="button" className="text-sm text-[#FF5722] hover:underline font-medium">
+                                    Forgot Password?
+                                </button>
+                            </div>
+                        )}
+
+                        <motion.button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FF5722] to-[#FF8A65] text-white font-bold text-lg shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                        >
+                            {loading ? (
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    {mode === "login" ? "Sign In" : "Create Account"}
+                                    <ArrowRight className="w-5 h-5" />
+                                </>
+                            )}
+                        </motion.button>
+                    </form>
+
+                    <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+                        {mode === "login" ? (
+                            <>
+                                Don&apos;t have an account?{" "}
+                                <button onClick={() => setMode("signup")} className="text-[#FF5722] font-semibold hover:underline">
+                                    Sign Up
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                Already have an account?{" "}
+                                <button onClick={() => setMode("login")} className="text-[#FF5722] font-semibold hover:underline">
+                                    Sign In
+                                </button>
+                            </>
+                        )}
+                    </p>
+
+                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
+                        By continuing, you agree to DealDost&apos;s{" "}
+                        <Link href="#" className="underline">Terms</Link> &{" "}
+                        <Link href="#" className="underline">Privacy Policy</Link>
+                    </p>
+
+                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+                        Made with ❤️ in India
+                    </p>
+                </motion.div>
+            </div>
+        </div>
+    );
+}
