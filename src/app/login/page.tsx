@@ -45,7 +45,7 @@ export default function LoginPage() {
   // Redirect to home only when the app has fully synced the user profile
   useEffect(() => {
     if (user) {
-      router.replace("/");
+      router.replace("/deals");
     }
   }, [user, router]);
 
@@ -64,7 +64,7 @@ export default function LoginPage() {
           avatarUrl: result.user.photoURL || "",
         }),
       });
-      router.replace("/");
+      router.replace("/deals");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Google login failed");
     } finally {
@@ -94,7 +94,7 @@ export default function LoginPage() {
           }),
         });
       }
-      router.replace("/");
+      router.replace("/deals");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed");
     } finally {
