@@ -342,13 +342,13 @@ export default function LoginPage() {
 
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
             By continuing, you agree to DealDost&apos;s{" "}
-            <Link href="#" className="underline">
+            <span className="underline cursor-pointer">
               Terms
-            </Link>{" "}
+            </span>{" "}
             and{" "}
-            <Link href="#" className="underline">
+            <span className="underline cursor-pointer">
               Privacy Policy
-            </Link>
+            </span>
           </p>
 
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">

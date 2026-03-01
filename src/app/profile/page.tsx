@@ -27,6 +27,13 @@ export default function ProfilePage() {
     const [tab, setTab] = useState<"posts" | "deals" | "food">("posts");
     const user = useAuthStore((state) => state.user);
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("tab") === "saved") {
+            setTab("deals");
+        }
+    }, []);
+
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<GenericPost[]>([]);
     const [savedDeals, setSavedDeals] = useState<Deal[]>([]);

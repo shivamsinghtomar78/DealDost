@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Trophy, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchLeaderboard } from "@/lib/client-api";
@@ -70,10 +71,11 @@ export default function LeaderboardPage() {
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {users.slice(0, 3).map((user, index) => (
-                            <div
+                            <Link
                                 key={user.id || user.username}
+                                href={`/profile/${user.username || "user"}`}
                                 className={cn(
-                                    "bg-white dark:bg-[#1e2028] rounded-2xl p-5 border text-center",
+                                    "bg-white dark:bg-[#1e2028] rounded-2xl p-5 border text-center hover:shadow-lg transition-shadow",
                                     index === 0
                                         ? "border-yellow-300 shadow-lg shadow-yellow-100/50 dark:shadow-yellow-900/20 ring-2 ring-yellow-200"
                                         : "border-border dark:border-[#2a2d34]"
@@ -95,14 +97,15 @@ export default function LeaderboardPage() {
                                     <span className="text-sm font-bold text-primary">{user.totalUpvotes}</span>
                                 </div>
                                 <p className="text-[10px] text-text-muted">{user.postsCount} posts</p>
-                            </div>
+                            </Link>
                         ))}
                     </div>
 
                     <div className="bg-white dark:bg-[#1e2028] rounded-2xl border border-border dark:border-[#2a2d34] overflow-hidden">
                         {users.slice(3).map((user) => (
-                            <div
+                            <Link
                                 key={user.id || user.username}
+                                href={`/profile/${user.username || "user"}`}
                                 className="flex items-center gap-4 px-5 py-4 border-b border-border dark:border-[#2a2d34] last:border-0 hover:bg-gray-50 dark:hover:bg-[#2a2d34] transition-colors"
                             >
                                 <span className="text-sm font-bold text-text-muted w-8 text-center">#{user.rank}</span>
@@ -117,7 +120,7 @@ export default function LeaderboardPage() {
                                     <Flame className="w-4 h-4 text-primary" />
                                     <span className="font-bold text-primary">{user.totalUpvotes}</span>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </>

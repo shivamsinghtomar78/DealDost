@@ -88,8 +88,13 @@ export function Sidebar() {
                     Profile
                 </Link>
                 <Link
-                    href="/profile"
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-text-secondary hover:bg-gray-100 dark:hover:bg-[#2a2d34] transition-colors"
+                    href="/profile?tab=saved"
+                    className={cn(
+                        "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-colors",
+                        pathname === "/profile" && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "saved"
+                            ? "bg-primary/10 text-primary"
+                            : "text-text-secondary hover:bg-gray-100 dark:hover:bg-[#2a2d34]"
+                    )}
                 >
                     <Bookmark className="w-4 h-4" />
                     Saved Items
