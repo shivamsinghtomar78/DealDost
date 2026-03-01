@@ -1,0 +1,414 @@
+{
+  "project": {
+    "name": "DealDost",
+    "tagline": "Apne sheher ki best deals, khana aur events - sab ek jagah",
+    "description": "A community-driven local discovery app for online deals, food spots, and neighbourhood updates.",
+    "type": "Full Stack Web Application",
+    "target_audience": "Indian urban users aged 18-35",
+    "languages": [
+      "English",
+      "Hinglish"
+    ],
+    "platforms": [
+      "Web"
+    ]
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "Next.js App Router",
+      "styling": "Tailwind CSS + shadcn/ui",
+      "state_management": "Zustand",
+      "forms": "React Hook Form + Zod",
+      "icons": "Lucide React",
+      "animations": "Framer Motion",
+      "maps": "Google Maps API"
+    },
+    "backend": {
+      "api": "Next.js Route Handlers",
+      "auth": "Firebase Auth (Google + Phone OTP)",
+      "storage": "Firebase Storage",
+      "realtime": "Firestore"
+    },
+    "database": {
+      "primary": "MongoDB Atlas (Mongoose)",
+      "secondary": "Neon PostgreSQL + PostGIS (Drizzle ORM)",
+      "purpose_split": {
+        "mongodb": "Posts, users, comments, interactions",
+        "neon": "Geo search, area/city filtering, analytics, search index"
+      }
+    },
+    "deployment": {
+      "hosting": "Vercel",
+      "cdn": "Vercel Edge Network"
+    }
+  },
+  "modules": {
+    "online_deals_hub": {
+      "platforms": {
+        "ecommerce": [
+          "Amazon",
+          "Flipkart",
+          "Myntra",
+          "Meesho",
+          "Nykaa",
+          "Ajio",
+          "Tata Cliq"
+        ],
+        "quick_commerce": [
+          "Zepto",
+          "Blinkit",
+          "Instamart",
+          "BigBasket Now",
+          "Dunzo"
+        ]
+      },
+      "post_fields": [
+        "title",
+        "description",
+        "platform",
+        "platform_type",
+        "original_price",
+        "deal_price",
+        "discount_percent",
+        "deal_link",
+        "images",
+        "category",
+        "expires_at",
+        "tags"
+      ],
+      "interactions": [
+        "upvote",
+        "save",
+        "share",
+        "comment",
+        "verify_active",
+        "mark_expired"
+      ],
+      "filters": [
+        "platform",
+        "category",
+        "discount",
+        "price_range",
+        "time_window",
+        "status"
+      ]
+    },
+    "food_spot_finder": {
+      "dish_categories": {
+        "street_snacks": [
+          "Momos",
+          "Chaat",
+          "Pani Puri",
+          "Samosa"
+        ],
+        "heavy_meals": [
+          "Chole Bhature",
+          "Rajma Chawal",
+          "Thali"
+        ],
+        "non_veg": [
+          "Chicken Biryani",
+          "Seekh Kebab",
+          "Butter Chicken"
+        ],
+        "cafe_drinks": [
+          "Chai",
+          "Cold Coffee",
+          "Lassi"
+        ],
+        "fast_food": [
+          "Pizza",
+          "Burger",
+          "Sandwich",
+          "Rolls"
+        ]
+      },
+      "post_fields": [
+        "place_name",
+        "dish_name",
+        "description",
+        "price_range",
+        "timing",
+        "images",
+        "google_maps_pin",
+        "area",
+        "city",
+        "landmark",
+        "tags"
+      ],
+      "interactions": [
+        "upvote",
+        "been_here",
+        "save_spot",
+        "review",
+        "add_photo",
+        "directions"
+      ],
+      "views": [
+        "list",
+        "map",
+        "dish_specific"
+      ]
+    },
+    "neighbourhood_board": {
+      "post_types": [
+        "local_event",
+        "lost_and_found",
+        "local_service",
+        "community_alert",
+        "flea_market"
+      ],
+      "filters": [
+        "city",
+        "area",
+        "post_type",
+        "recency"
+      ]
+    },
+    "daily_trending": {
+      "widgets": [
+        "top_5_deals_today",
+        "hottest_food_spot_week",
+        "most_active_neighbourhood",
+        "flash_deals_expiring_soon"
+      ]
+    }
+  },
+  "database_schemas": {
+    "mongodb": {
+      "users": {
+        "_id": "ObjectId",
+        "firebase_uid": "string",
+        "name": "string",
+        "username": "string",
+        "email": "string",
+        "phone": "string",
+        "avatar": "string",
+        "bio": "string",
+        "city": "string",
+        "area": "string",
+        "saved_deals": "ObjectId[]",
+        "saved_food_spots": "ObjectId[]",
+        "total_upvotes_received": "number",
+        "posts_count": "number",
+        "badges": "string[]",
+        "created_at": "datetime",
+        "updated_at": "datetime"
+      },
+      "posts": {
+        "_id": "ObjectId",
+        "type": "deal|food_spot|event|lost_found|service|alert",
+        "user_id": "ObjectId",
+        "title": "string",
+        "description": "string",
+        "images": "string[]",
+        "upvotes": "number",
+        "upvoted_by": "ObjectId[]",
+        "comments_count": "number",
+        "saves_count": "number",
+        "status": "active|expired|removed",
+        "deal_data": "object",
+        "food_data": "object",
+        "location": "object",
+        "tags": "string[]",
+        "created_at": "datetime",
+        "updated_at": "datetime"
+      },
+      "comments": {
+        "_id": "ObjectId",
+        "post_id": "ObjectId",
+        "user_id": "ObjectId",
+        "parent_comment_id": "ObjectId|null",
+        "text": "string",
+        "upvotes": "number",
+        "created_at": "datetime"
+      },
+      "notifications": {
+        "_id": "ObjectId",
+        "user_id": "ObjectId",
+        "type": "deal_expiring|new_comment|upvote_milestone|deal_verified",
+        "message": "string",
+        "post_id": "ObjectId",
+        "is_read": "boolean",
+        "created_at": "datetime"
+      }
+    },
+    "neon": {
+      "locations": {
+        "id": "uuid",
+        "mongo_post_id": "text",
+        "city": "text",
+        "area": "text",
+        "lat": "float",
+        "lng": "float",
+        "post_type": "text",
+        "dish_name": "text",
+        "platform": "text",
+        "upvotes": "integer",
+        "created_at": "timestamp",
+        "geom": "geography(Point,4326)"
+      },
+      "search_index": {
+        "id": "uuid",
+        "mongo_post_id": "text",
+        "search_vector": "tsvector",
+        "title": "text",
+        "tags": "text[]",
+        "city": "text",
+        "post_type": "text",
+        "platform": "text",
+        "created_at": "timestamp"
+      }
+    }
+  },
+  "api_routes": {
+    "auth": [
+      "POST /api/auth/register",
+      "POST /api/auth/sync",
+      "GET /api/auth/me"
+    ],
+    "posts": [
+      "GET /api/posts",
+      "POST /api/posts",
+      "GET /api/posts/:id",
+      "PUT /api/posts/:id",
+      "DELETE /api/posts/:id",
+      "POST /api/posts/:id/upvote",
+      "POST /api/posts/:id/save",
+      "POST /api/posts/:id/verify"
+    ],
+    "comments": [
+      "GET /api/posts/:id/comments",
+      "POST /api/posts/:id/comments",
+      "DELETE /api/comments/:id"
+    ],
+    "food": [
+      "GET /api/food",
+      "GET /api/food/dish/:dishName",
+      "GET /api/food/nearby",
+      "POST /api/food/:id/review"
+    ],
+    "deals": [
+      "GET /api/deals",
+      "GET /api/deals/trending",
+      "GET /api/deals/expiring",
+      "GET /api/deals/platform/:name"
+    ],
+    "search": [
+      "GET /api/search",
+      "GET /api/search/nearby"
+    ],
+    "users": [
+      "GET /api/users/:id",
+      "PUT /api/users/:id",
+      "GET /api/users/:id/posts",
+      "GET /api/users/:id/saved",
+      "GET /api/leaderboard"
+    ],
+    "upload": [
+      "POST /api/upload",
+      "DELETE /api/upload"
+    ]
+  },
+  "nextjs_structure": {
+    "app": [
+      "page.tsx",
+      "deals/page.tsx",
+      "deals/[platform]/page.tsx",
+      "deals/[id]/page.tsx",
+      "food/page.tsx",
+      "food/[dish]/page.tsx",
+      "food/[id]/page.tsx",
+      "food/map/page.tsx",
+      "neighbourhood/page.tsx",
+      "trending/page.tsx",
+      "post/new/page.tsx",
+      "profile/page.tsx",
+      "profile/[username]/page.tsx",
+      "search/page.tsx",
+      "leaderboard/page.tsx"
+    ],
+    "components": [
+      "ui/*",
+      "feed/DealCard.tsx",
+      "feed/FoodSpotCard.tsx",
+      "feed/EventCard.tsx",
+      "forms/*",
+      "maps/*",
+      "filters/*",
+      "common/*"
+    ],
+    "lib": [
+      "mongodb.ts",
+      "neon.ts",
+      "firebase.ts",
+      "firebase-admin.ts",
+      "utils.ts",
+      "validations.ts"
+    ],
+    "models": [
+      "User.ts",
+      "Post.ts",
+      "Comment.ts",
+      "Notification.ts"
+    ],
+    "hooks": [
+      "useAuth.ts",
+      "usePosts.ts",
+      "useLocation.ts",
+      "useUpvote.ts",
+      "useSearch.ts"
+    ],
+    "store": [
+      "authStore.ts",
+      "filterStore.ts",
+      "locationStore.ts"
+    ]
+  },
+  "unique_features": [
+    "deal_expiry_countdown",
+    "community_deal_verification",
+    "savings_calculator",
+    "flash_deals_alerts",
+    "food_map_view",
+    "receipt_proof_upload",
+    "weekly_leaderboard",
+    "been_here_counter",
+    "deal_price_history",
+    "dish_heatmap"
+  ],
+  "environment_variables": [
+    "MONGODB_URI",
+    "DATABASE_URL",
+    "NEXT_PUBLIC_FIREBASE_API_KEY",
+    "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+    "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+    "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+    "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+    "NEXT_PUBLIC_FIREBASE_APP_ID",
+    "FIREBASE_ADMIN_PRIVATE_KEY",
+    "FIREBASE_ADMIN_CLIENT_EMAIL",
+    "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY",
+    "NEXT_PUBLIC_APP_URL",
+    "SEED_SECRET"
+  ],
+  "mvp_timeline": {
+    "week_1_2": "Auth, core models, post creation",
+    "week_3": "Feeds + filters + upvotes",
+    "week_4": "Geo filtering + map integration",
+    "week_5": "Notifications + expiry alerts",
+    "week_6": "UI polish + deployment"
+  },
+  "seo": {
+    "dynamic_og_tags": true,
+    "city_landing_pages": true,
+    "sitemap": true,
+    "structured_data": true,
+    "target_keywords": [
+      "best momos near me",
+      "zepto deals today",
+      "amazon deals india",
+      "chole bhature delhi"
+    ]
+  }
+}

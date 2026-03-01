@@ -1,59 +1,174 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import connectDB from "@/lib/mongodb";
 import FoodSpot from "@/models/FoodSpot";
+import {
+    handleRouteError,
+    isValidObjectId,
+    respondError,
+    respondOk,
+} from "@/lib/api-helpers";
+import { foodSpotActionSchema, foodSpotUpdateSchema } from "@/lib/validation";
 
 interface RouteContext {
     params: Promise<{ id: string }>;
 }
+
+export const runtime = "nodejs";
 
 // GET /api/food-spots/[id]
 export async function GET(_req: NextRequest, context: RouteContext) {
     try {
         await connectDB();
         const { id } = await context.params;
-        const spot = await FoodSpot.findById(id).lean();
 
-        if (!spot) {
-            return NextResponse.json({ error: "Food spot not found" }, { status: 404 });
+        if (!isValidObjectId(id)) {
+            return respondError("Invalid food spot id", 400);
         }
 
-        return NextResponse.json({ spot });
+        const spot = await FoodSpot.findById(id)
+            .select("-upvotedBy -beenHereBy")
+            .lean();
+
+        if (!spot) {
+            return respondError("Food spot not found", 404);
+        }
+
+        return respondOk({ spot }, 200, "s-maxage=30, stale-while-revalidate=120");
     } catch (error) {
-        console.error("GET /api/food-spots/[id] error:", error);
-        return NextResponse.json({ error: "Failed to fetch food spot" }, { status: 500 });
+        return handleRouteError("GET /api/food-spots/[id]", error);
     }
 }
 
-// PUT /api/food-spots/[id] — Upvote, rate, been-here
+// PUT /api/food-spots/[id]
 export async function PUT(req: NextRequest, context: RouteContext) {
     try {
         await connectDB();
         const { id } = await context.params;
-        const body = await req.json();
-        const { action, userId } = body;
 
-        let update: Record<string, unknown> = {};
-
-        if (action === "upvote") {
-            const spot = await FoodSpot.findById(id);
-            if (!spot) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-            if (spot.upvotedBy.includes(userId)) {
-                update = { $inc: { upvotes: -1 }, $pull: { upvotedBy: userId } };
-            } else {
-                update = { $inc: { upvotes: 1 }, $addToSet: { upvotedBy: userId } };
-            }
-        } else if (action === "been_here") {
-            update = { $inc: { beenHereCount: 1 }, $addToSet: { beenHereBy: userId } };
-        } else {
-            update = body;
+        if (!isValidObjectId(id)) {
+            return respondError("Invalid food spot id", 400);
         }
 
-        const spot = await FoodSpot.findByIdAndUpdate(id, update, { new: true }).lean();
-        return NextResponse.json({ spot });
+        const body = await req.json();
+        const hasAction =
+            typeof body === "object" &&
+            body !== null &&
+            "action" in body;
+
+        if (hasAction) {
+            const parsedAction = foodSpotActionSchema.safeParse(body);
+            if (!parsedAction.success) {
+                return respondError("Invalid action payload", 400, parsedAction.error.flatten());
+            }
+
+            const { action, userId } = parsedAction.data;
+
+            if (action === "upvote") {
+                const spot = await FoodSpot.findOneAndUpdate(
+                    { _id: id },
+                    [
+                        { $set: { _alreadyUpvoted: { $in: [userId, "$upvotedBy"] } } },
+                        {
+                            $set: {
+                                upvotedBy: {
+                                    $cond: [
+                                        "$_alreadyUpvoted",
+                                        { $setDifference: ["$upvotedBy", [userId]] },
+                                        { $setUnion: ["$upvotedBy", [userId]] },
+                                    ],
+                                },
+                                upvotes: {
+                                    $cond: [
+                                        "$_alreadyUpvoted",
+                                        { $max: [{ $subtract: ["$upvotes", 1] }, 0] },
+                                        { $add: ["$upvotes", 1] },
+                                    ],
+                                },
+                            },
+                        },
+                        { $unset: "_alreadyUpvoted" },
+                    ],
+                    { new: true }
+                )
+                    .select("-upvotedBy -beenHereBy")
+                    .lean();
+
+                if (!spot) {
+                    return respondError("Food spot not found", 404);
+                }
+
+                return respondOk({ spot });
+            }
+
+            const spot = await FoodSpot.findOneAndUpdate(
+                { _id: id },
+                [
+                    { $set: { _alreadyBeenHere: { $in: [userId, "$beenHereBy"] } } },
+                    {
+                        $set: {
+                            beenHereBy: {
+                                $cond: [
+                                    "$_alreadyBeenHere",
+                                    { $setDifference: ["$beenHereBy", [userId]] },
+                                    { $setUnion: ["$beenHereBy", [userId]] },
+                                ],
+                            },
+                            beenHereCount: {
+                                $cond: [
+                                    "$_alreadyBeenHere",
+                                    { $max: [{ $subtract: ["$beenHereCount", 1] }, 0] },
+                                    { $add: ["$beenHereCount", 1] },
+                                ],
+                            },
+                        },
+                    },
+                    { $unset: "_alreadyBeenHere" },
+                ],
+                { new: true }
+            )
+                .select("-upvotedBy -beenHereBy")
+                .lean();
+
+            if (!spot) {
+                return respondError("Food spot not found", 404);
+            }
+
+            return respondOk({ spot });
+        }
+
+        const parsedUpdate = foodSpotUpdateSchema.safeParse(body);
+        if (!parsedUpdate.success) {
+            return respondError("Invalid food spot update payload", 400, parsedUpdate.error.flatten());
+        }
+
+        const updateData = parsedUpdate.data;
+
+        if (Object.keys(updateData).length === 0) {
+            return respondError("No update fields provided", 400);
+        }
+
+        if (updateData.priceRange && updateData.priceRange.max < updateData.priceRange.min) {
+            return respondError("priceRange.max must be greater than or equal to priceRange.min", 400);
+        }
+
+        const spot = await FoodSpot.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            {
+                new: true,
+                runValidators: true,
+            }
+        )
+            .select("-upvotedBy -beenHereBy")
+            .lean();
+
+        if (!spot) {
+            return respondError("Food spot not found", 404);
+        }
+
+        return respondOk({ spot });
     } catch (error) {
-        console.error("PUT /api/food-spots/[id] error:", error);
-        return NextResponse.json({ error: "Failed to update" }, { status: 500 });
+        return handleRouteError("PUT /api/food-spots/[id]", error);
     }
 }
 
@@ -62,10 +177,18 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
     try {
         await connectDB();
         const { id } = await context.params;
-        await FoodSpot.findByIdAndDelete(id);
-        return NextResponse.json({ message: "Food spot deleted" });
+
+        if (!isValidObjectId(id)) {
+            return respondError("Invalid food spot id", 400);
+        }
+
+        const deleted = await FoodSpot.findByIdAndDelete(id).lean();
+        if (!deleted) {
+            return respondError("Food spot not found", 404);
+        }
+
+        return respondOk({ message: "Food spot deleted" });
     } catch (error) {
-        console.error("DELETE /api/food-spots/[id] error:", error);
-        return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
+        return handleRouteError("DELETE /api/food-spots/[id]", error);
     }
 }

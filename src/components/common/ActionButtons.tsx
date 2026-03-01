@@ -4,13 +4,22 @@ import { Bookmark, Share2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 
-export function SaveButton({ postId }: { postId: string }) {
-    const { isSaved, toggleSaveDeal } = useAuthStore();
+export function SaveButton({ postId, entityType = "deal" }: { postId: string; entityType?: "deal" | "food" }) {
+    const { isSaved, toggleSaveDeal, toggleSaveFoodSpot } = useAuthStore();
     const saved = isSaved(postId);
+
+    const toggle = () => {
+        if (entityType === "food") {
+            toggleSaveFoodSpot(postId);
+            return;
+        }
+
+        toggleSaveDeal(postId);
+    };
 
     return (
         <button
-            onClick={() => toggleSaveDeal(postId)}
+            onClick={toggle}
             className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all",
                 saved

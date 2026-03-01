@@ -18,7 +18,7 @@ export function CountdownTimer({ expiresAt, compact = false }: { expiresAt: stri
     if (countdown.expired) {
         return (
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-semibold">
-                ❌ Expired
+                Expired
             </span>
         );
     }
@@ -34,7 +34,7 @@ export function CountdownTimer({ expiresAt, compact = false }: { expiresAt: stri
                     isWarning ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400" :
                         "bg-primary/10 text-primary"
             )}>
-                ⏰ {countdown.hours}h {countdown.minutes}m
+                T-{countdown.hours}h {countdown.minutes}m
             </span>
         );
     }

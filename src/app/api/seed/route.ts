@@ -1,19 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Deal from "@/models/Deal";
 import FoodSpot from "@/models/FoodSpot";
 import Event from "@/models/Event";
 import User from "@/models/User";
+import { handleRouteError, respondError, respondOk } from "@/lib/api-helpers";
 
-// POST /api/seed — Populate database with initial mock data
+export const runtime = "nodejs";
+
+// POST /api/seed Ã¢â‚¬â€ Populate database with initial mock data
 export async function POST(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
         const secret = searchParams.get("secret");
+        const seedSecret = process.env.SEED_SECRET;
 
-        // Simple protection — in production, use a proper auth check
-        if (secret !== "dealdost2024") {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        if (!seedSecret) {
+            return respondError("SEED_SECRET is not configured on the server", 503);
+        }
+
+        if (secret !== seedSecret) {
+            return respondError("Unauthorized", 401);
         }
 
         await connectDB();
@@ -42,8 +49,8 @@ export async function POST(req: NextRequest) {
         // Seed Deals
         const deals = [
             {
-                title: "Amul Butter 500g — Fresh Stock at Lowest!",
-                description: "Zepto flash deal! Fresh Amul butter at just ₹89. Running out fast, grab before stock ends.",
+                title: "Amul Butter 500g Ã¢â‚¬â€ Fresh Stock at Lowest!",
+                description: "Zepto flash deal! Fresh Amul butter at just Ã¢â€šÂ¹89. Running out fast, grab before stock ends.",
                 platform: "Zepto", platformType: "quick_commerce", category: "Grocery",
                 originalPrice: 120, dealPrice: 89, discountPercent: 26,
                 dealLink: "https://zepto.co/deal/amul-butter", imageUrl: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=400&h=300&fit=crop",
@@ -52,8 +59,8 @@ export async function POST(req: NextRequest) {
                 upvotes: 89, verifiedCount: 32, isActive: true, tags: ["grocery", "dairy", "flash"],
             },
             {
-                title: "boAt Airdopes 141 — Lowest Ever!",
-                description: "Amazon Great Indian Festival price! Amazing TWS under ₹900. Grab before stock runs out!",
+                title: "boAt Airdopes 141 Ã¢â‚¬â€ Lowest Ever!",
+                description: "Amazon Great Indian Festival price! Amazing TWS under Ã¢â€šÂ¹900. Grab before stock runs out!",
                 platform: "Amazon", platformType: "ecommerce", category: "Electronics",
                 originalPrice: 2999, dealPrice: 899, discountPercent: 70,
                 dealLink: "https://amazon.in/deal/boat-airdopes", imageUrl: "https://images.unsplash.com/photo-1590658268037-6bf12f032f55?w=400&h=300&fit=crop",
@@ -62,7 +69,7 @@ export async function POST(req: NextRequest) {
                 upvotes: 234, verifiedCount: 45, isActive: true, tags: ["electronics", "earbuds", "amazon"],
             },
             {
-                title: "Meesho — Cotton Kurti Set of 3",
+                title: "Meesho Ã¢â‚¬â€ Cotton Kurti Set of 3",
                 description: "Meesho mega sale! 3 cotton kurtis in combo. Perfect for office and casual wear.",
                 platform: "Meesho", platformType: "ecommerce", category: "Fashion",
                 originalPrice: 1500, dealPrice: 449, discountPercent: 70,
@@ -72,7 +79,7 @@ export async function POST(req: NextRequest) {
                 upvotes: 55, verifiedCount: 18, isActive: true, tags: ["fashion", "kurti", "combo"],
             },
             {
-                title: "Nykaa — Maybelline Fit Me Foundation Set",
+                title: "Nykaa Ã¢â‚¬â€ Maybelline Fit Me Foundation Set",
                 description: "Complete foundation + concealer + setting powder combo at unbeatable price.",
                 platform: "Nykaa", platformType: "ecommerce", category: "Beauty",
                 originalPrice: 1800, dealPrice: 699, discountPercent: 61,
@@ -82,7 +89,7 @@ export async function POST(req: NextRequest) {
                 upvotes: 28, verifiedCount: 12, isActive: true, tags: ["beauty", "makeup", "foundation"],
             },
             {
-                title: "Maggi 12-Pack — Stock Up!",
+                title: "Maggi 12-Pack Ã¢â‚¬â€ Stock Up!",
                 description: "Blinkit flash sale! 12-pack Maggi at lowest price. Perfect for hostel life.",
                 platform: "Blinkit", platformType: "quick_commerce", category: "Grocery",
                 originalPrice: 192, dealPrice: 139, discountPercent: 28,
@@ -115,7 +122,7 @@ export async function POST(req: NextRequest) {
             },
             {
                 name: "Sita Ram Diwan Chand",
-                description: "Iconic chole bhature since 1955! The OG taste of Old Delhi — thick crispy bhature and spicy chole.",
+                description: "Iconic chole bhature since 1955! The OG taste of Old Delhi Ã¢â‚¬â€ thick crispy bhature and spicy chole.",
                 dishCategory: "Chole Bhature", dishTags: ["Chole Bhature", "Lassi"],
                 priceRange: { min: 60, max: 120 },
                 area: "Paharganj", city: "Delhi", address: "2243, Rajguru Marg, Chuna Mandi",
@@ -128,7 +135,7 @@ export async function POST(req: NextRequest) {
                 spotType: "restaurant", tags: ["chole bhature", "iconic", "old delhi"],
             },
             {
-                name: "Al Jawahar — Jama Masjid",
+                name: "Al Jawahar Ã¢â‚¬â€ Jama Masjid",
                 description: "The legendary Mughlai restaurant at Jama Masjid! Butter Chicken, Nihari, and the famous Seekh Kebabs.",
                 dishCategory: "Butter Chicken", dishTags: ["Butter Chicken", "Nihari", "Seekh Kebab"],
                 priceRange: { min: 200, max: 450 },
@@ -150,7 +157,7 @@ export async function POST(req: NextRequest) {
         // Seed Events
         const events = [
             {
-                title: "Garba Night at Connaught Place 🎉",
+                title: "Garba Night at Connaught Place Ã°Å¸Å½â€°",
                 description: "Join Delhi's biggest garba event! Live music, dandiya sticks provided, food stalls, and prizes for best dressed.",
                 eventType: "event", date: "Oct 12, 2024", time: "7:00 PM",
                 venue: "Central Park, Connaught Place", area: "Connaught Place", city: "Delhi",
@@ -160,7 +167,7 @@ export async function POST(req: NextRequest) {
                 tags: ["garba", "navratri", "dandiya"],
             },
             {
-                title: "Sunday Flea Market — Sarojini Nagar 🛍️",
+                title: "Sunday Flea Market Ã¢â‚¬â€ Sarojini Nagar Ã°Å¸â€ºÂÃ¯Â¸Â",
                 description: "Biggest weekend flea market! Handmade crafts, vintage clothes, street food, live music. Every Sunday!",
                 eventType: "event", date: "Every Sunday", time: "10:00 AM - 6:00 PM",
                 venue: "Sarojini Nagar Market Grounds", area: "Sarojini Nagar", city: "Delhi",
@@ -182,12 +189,15 @@ export async function POST(req: NextRequest) {
             User.countDocuments(),
         ]);
 
-        return NextResponse.json({
-            message: "✅ Database seeded successfully!",
+        return respondOk({
+            message: "Database seeded successfully",
             counts: { deals: counts[0], foodSpots: counts[1], events: counts[2], users: counts[3] },
         });
     } catch (error) {
-        console.error("POST /api/seed error:", error);
-        return NextResponse.json({ error: "Failed to seed database" }, { status: 500 });
+        return handleRouteError("POST /api/seed", error);
     }
 }
+
+
+
+

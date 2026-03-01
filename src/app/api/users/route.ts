@@ -1,28 +1,67 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import {
+    cleanString,
+    handleRouteError,
+    parseInteger,
+    respondError,
+    respondOk,
+} from "@/lib/api-helpers";
+import { userUpsertSchema } from "@/lib/validation";
 
-// GET /api/users — Leaderboard or search users
+export const runtime = "nodejs";
+
+function toUsernameBase(input: string): string {
+    const normalized = input
+        .toLowerCase()
+        .replace(/[^a-z0-9_]+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 24);
+
+    return normalized || "user";
+}
+
+async function ensureUniqueUsername(base: string, currentUserId?: string) {
+    const root = toUsernameBase(base);
+    let candidate = root;
+    let attempt = 1;
+
+    while (true) {
+        const existing = await User.findOne({ username: candidate })
+            .select("_id")
+            .lean();
+
+        if (!existing || String(existing._id) === currentUserId) {
+            return candidate;
+        }
+
+        attempt += 1;
+        candidate = `${root}_${attempt}`.slice(0, 40);
+    }
+}
+
+// GET /api/users
 export async function GET(req: NextRequest) {
     try {
         await connectDB();
 
         const { searchParams } = new URL(req.url);
-        const uid = searchParams.get("uid");
-        const username = searchParams.get("username");
+        const uid = cleanString(searchParams.get("uid"));
+        const username = cleanString(searchParams.get("username"))?.toLowerCase();
         const leaderboard = searchParams.get("leaderboard") === "true";
-        const limit = parseInt(searchParams.get("limit") || "10");
+        const limit = parseInteger(searchParams.get("limit"), 10, 1, 100);
 
         if (uid) {
             const user = await User.findOne({ firebaseUid: uid }).lean();
-            if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-            return NextResponse.json({ user });
+            if (!user) return respondError("User not found", 404);
+            return respondOk({ user });
         }
 
         if (username) {
             const user = await User.findOne({ username }).lean();
-            if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
-            return NextResponse.json({ user });
+            if (!user) return respondError("User not found", 404);
+            return respondOk({ user });
         }
 
         if (leaderboard) {
@@ -31,42 +70,62 @@ export async function GET(req: NextRequest) {
                 .limit(limit)
                 .select("name username avatarUrl karmaPoints postsCount totalUpvotes badges rank")
                 .lean();
-            return NextResponse.json({ users });
+            return respondOk({ users });
         }
 
-        return NextResponse.json({ error: "Provide uid, username, or leaderboard=true" }, { status: 400 });
+        return respondError("Provide uid, username, or leaderboard=true", 400);
     } catch (error) {
-        console.error("GET /api/users error:", error);
-        return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 });
+        return handleRouteError("GET /api/users", error);
     }
 }
 
-// POST /api/users — Create or update user profile (called after Firebase auth)
+// POST /api/users
 export async function POST(req: NextRequest) {
     try {
         await connectDB();
-        const body = await req.json();
+        const payload = await req.json();
+        const parsed = userUpsertSchema.safeParse(payload);
 
-        const existingUser = await User.findOne({ firebaseUid: body.firebaseUid });
-
-        if (existingUser) {
-            // Update existing user
-            const updated = await User.findOneAndUpdate(
-                { firebaseUid: body.firebaseUid },
-                { $set: { name: body.name, email: body.email, avatarUrl: body.avatarUrl } },
-                { new: true }
-            ).lean();
-            return NextResponse.json({ user: updated });
+        if (!parsed.success) {
+            return respondError("Invalid user payload", 400, parsed.error.flatten());
         }
 
-        // Create new user
+        const data = parsed.data;
+        const existingUser = await User.findOne({ firebaseUid: data.firebaseUid });
+
+        if (existingUser) {
+            const nextUsername = await ensureUniqueUsername(
+                data.username ?? existingUser.username,
+                String(existingUser._id)
+            );
+
+            const updated = await User.findOneAndUpdate(
+                { firebaseUid: data.firebaseUid },
+                {
+                    $set: {
+                        name: data.name,
+                        email: data.email,
+                        avatarUrl: data.avatarUrl ?? existingUser.avatarUrl,
+                        username: nextUsername,
+                    },
+                },
+                { new: true }
+            ).lean();
+
+            return respondOk({ user: updated });
+        }
+
+        const usernameSeed = data.username ?? data.email.split("@")[0] ?? data.name;
+        const username = await ensureUniqueUsername(usernameSeed);
+
         const user = await User.create({
-            ...body,
-            username: body.username || body.email.split("@")[0],
+            ...data,
+            username,
+            avatarUrl: data.avatarUrl ?? "",
         });
-        return NextResponse.json({ user }, { status: 201 });
+
+        return respondOk({ user }, 201);
     } catch (error) {
-        console.error("POST /api/users error:", error);
-        return NextResponse.json({ error: "Failed to create/update user" }, { status: 500 });
+        return handleRouteError("POST /api/users", error);
     }
 }

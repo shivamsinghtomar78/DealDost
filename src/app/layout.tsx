@@ -19,17 +19,17 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "DealDost — Daily Deals, Food Spots & Local Discovery",
+  title: "DealDost - Daily Deals, Food Spots & Local Discovery",
   description:
-    "Apne sheher ki best deals, khana aur events — sab ek jagah. Discover community-curated deals from Amazon, Flipkart, Zepto & more, find the best local food spots, and stay connected with your neighbourhood.",
+    "Discover community-curated deals, food spots, and neighbourhood updates in one place.",
   keywords: [
     "deals", "food spots", "local discovery", "India", "Amazon deals",
     "Flipkart deals", "Zepto deals", "best momos", "chole bhature delhi",
     "neighbourhood events", "community deals",
   ],
   openGraph: {
-    title: "DealDost — Your Daily Deals & Local Discovery App",
-    description: "Apne sheher ki best deals, khana aur events — sab ek jagah",
+    title: "DealDost - Your Daily Deals & Local Discovery App",
+    description: "Daily deals, food spots, and neighbourhood updates",
     type: "website",
   },
 };

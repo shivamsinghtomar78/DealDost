@@ -1,36 +1,81 @@
 "use client";
 
-import { useState } from "react";
-import { MOCK_DEALS, PLATFORMS } from "@/lib/mock-data";
+import { useEffect, useMemo, useState } from "react";
+import { PLATFORMS } from "@/lib/mock-data";
 import { DEAL_CATEGORIES } from "@/lib/utils";
 import { DealCard } from "@/components/feed/DealCard";
 import { cn } from "@/lib/utils";
-import { ShoppingCart, Zap, SlidersHorizontal } from "lucide-react";
+import { ShoppingCart, Zap, Search } from "lucide-react";
+import { fetchDeals } from "@/lib/client-api";
+import type { Deal } from "@/lib/mock-data";
 
 export default function DealsPage() {
     const [platform, setPlatform] = useState("All");
     const [category, setCategory] = useState("All");
     const [sortBy, setSortBy] = useState("hot");
     const [showExpiring, setShowExpiring] = useState(false);
+    const [search, setSearch] = useState("");
 
-    const filtered = MOCK_DEALS.filter((deal) => {
-        if (platform !== "All" && deal.platform !== platform) return false;
-        if (category !== "All" && deal.category !== category) return false;
-        if (showExpiring) {
-            const h = (new Date(deal.expiresAt).getTime() - Date.now()) / 3600000;
-            if (h > 3) return false;
-        }
-        return true;
-    }).sort((a, b) => {
-        if (sortBy === "hot") return b.upvotes - a.upvotes;
-        if (sortBy === "latest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        if (sortBy === "discount") return b.discountPercent - a.discountPercent;
-        return 0;
-    });
+    const [deals, setDeals] = useState<Deal[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [referenceTime, setReferenceTime] = useState(() => Date.now());
+
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            setReferenceTime(Date.now());
+        }, 60000);
+
+        return () => window.clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        let active = true;
+
+        const loadDeals = async () => {
+            setLoading(true);
+            setError(null);
+
+            const data = await fetchDeals({
+                platform,
+                category,
+                sort: sortBy === "latest" ? "newest" : sortBy,
+                search: search.trim() || undefined,
+                expiringSoon: showExpiring,
+                limit: 60,
+                signal: controller.signal,
+            });
+
+            if (!active) return;
+
+            setDeals(data);
+            setLoading(false);
+        };
+
+        loadDeals().catch((fetchError) => {
+            if (!active) return;
+            const message = fetchError instanceof Error ? fetchError.message : "Failed to load deals";
+            setError(message);
+            setLoading(false);
+        });
+
+        return () => {
+            active = false;
+            controller.abort();
+        };
+    }, [platform, category, sortBy, showExpiring, search]);
+
+    const filtered = useMemo(() => {
+        return deals.filter((deal) => {
+            if (!showExpiring) return true;
+            const hoursLeft = (new Date(deal.expiresAt).getTime() - referenceTime) / 3600000;
+            return hoursLeft > 0 && hoursLeft <= 3;
+        });
+    }, [deals, showExpiring, referenceTime]);
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-            {/* Header */}
             <div>
                 <div className="flex items-center gap-2 mb-1">
                     <ShoppingCart className="w-6 h-6 text-primary" />
@@ -39,11 +84,21 @@ export default function DealsPage() {
                     </h1>
                 </div>
                 <p className="text-sm text-text-secondary">
-                    Community-curated deals from across India • <span className="font-semibold text-primary">{MOCK_DEALS.length} active deals</span>
+                    Community-curated deals across India
+                    <span className="font-semibold text-primary"> Â· {filtered.length} active</span>
                 </p>
             </div>
 
-            {/* Platform Filter */}
+            <div className="relative">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search deals or products"
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-white dark:bg-[#1e2028] dark:border-[#2a2d34] text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                />
+            </div>
+
             <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2">
                 {PLATFORMS.map((p) => (
                     <button
@@ -62,7 +117,6 @@ export default function DealsPage() {
                 ))}
             </div>
 
-            {/* Category + Sort */}
             <div className="flex items-center gap-3 flex-wrap">
                 <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
                     {DEAL_CATEGORIES.map((cat) => (
@@ -83,7 +137,7 @@ export default function DealsPage() {
 
                 <div className="flex items-center gap-2 ml-auto">
                     <button
-                        onClick={() => setShowExpiring(!showExpiring)}
+                        onClick={() => setShowExpiring((current) => !current)}
                         className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all",
                             showExpiring
@@ -100,19 +154,27 @@ export default function DealsPage() {
                         onChange={(e) => setSortBy(e.target.value)}
                         className="px-3 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-[#2a2d34] text-text-secondary border-0 outline-none cursor-pointer"
                     >
-                        <option value="hot">🔥 Hot</option>
-                        <option value="latest">🕐 Latest</option>
-                        <option value="discount">💰 Highest Discount</option>
+                        <option value="hot">Hot</option>
+                        <option value="latest">Latest</option>
+                        <option value="discount">Highest Discount</option>
                     </select>
                 </div>
             </div>
 
-            {/* Deal Grid */}
-            {filtered.length === 0 ? (
+            {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                        <div key={index} className="h-80 rounded-2xl border border-border bg-white dark:bg-[#1e2028] dark:border-[#2a2d34] skeleton-shimmer" />
+                    ))}
+                </div>
+            ) : error ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm">
+                    {error}
+                </div>
+            ) : filtered.length === 0 ? (
                 <div className="text-center py-16">
-                    <div className="text-5xl mb-4">🔍</div>
                     <p className="text-lg font-bold text-text-primary dark:text-white">No deals found</p>
-                    <p className="text-sm text-text-secondary mt-1">Try changing your filters</p>
+                    <p className="text-sm text-text-secondary mt-1">Try changing your filters or search query</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

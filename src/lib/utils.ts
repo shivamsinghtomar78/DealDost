@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatPrice(price: number): string {
-  return `₹${price.toLocaleString("en-IN")}`;
+  return `Rs ${price.toLocaleString("en-IN")}`;
 }
 
 export function calculateDiscount(original: number, deal: number): number {
@@ -29,9 +29,9 @@ export function getCountdown(expiresAt: Date | string): { hours: number; minutes
   const now = new Date();
   const expiry = new Date(expiresAt);
   const diff = Math.max(0, expiry.getTime() - now.getTime());
-  
+
   if (diff === 0) return { hours: 0, minutes: 0, seconds: 0, expired: true };
-  
+
   return {
     hours: Math.floor(diff / 3600000),
     minutes: Math.floor((diff % 3600000) / 60000),
@@ -48,20 +48,20 @@ export const PLATFORM_COLORS: Record<string, string> = {
   Blinkit: "#F8D000",
   Instamart: "#FC8019",
   Meesho: "#9B2D8E",
-  "BigBasket": "#84C225",
+  BigBasket: "#84C225",
   Nykaa: "#FC2779",
   Ajio: "#3D3D3D",
   "Tata Cliq": "#CC0066",
 };
 
 export const DISH_EMOJIS: Record<string, string> = {
-  "Street Snacks": "🥟",
-  "Heavy Meals": "🍛",
-  "Non-Veg": "🍗",
-  "South Indian": "🫓",
-  "Cafe & Drinks": "☕",
-  "Fast Food": "🍕",
-  "Sweets & Desserts": "🍰",
+  "Street Snacks": "SN",
+  "Heavy Meals": "HM",
+  "Non-Veg": "NV",
+  "South Indian": "SI",
+  "Cafe & Drinks": "CF",
+  "Fast Food": "FF",
+  "Sweets & Desserts": "SD",
 };
 
 export const DEAL_CATEGORIES = [

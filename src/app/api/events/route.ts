@@ -1,6 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Event from "@/models/Event";
+import {
+    cleanString,
+    handleRouteError,
+    parsePagination,
+    respondError,
+    respondOk,
+} from "@/lib/api-helpers";
+import { eventCreateSchema } from "@/lib/validation";
+
+export const runtime = "nodejs";
 
 // GET /api/events
 export async function GET(req: NextRequest) {
@@ -8,32 +18,46 @@ export async function GET(req: NextRequest) {
         await connectDB();
 
         const { searchParams } = new URL(req.url);
-        const eventType = searchParams.get("type");
-        const area = searchParams.get("area");
-        const city = searchParams.get("city");
-        const search = searchParams.get("search");
-        const page = parseInt(searchParams.get("page") || "1");
-        const limit = parseInt(searchParams.get("limit") || "12");
+        const eventType = cleanString(searchParams.get("type"));
+        const area = cleanString(searchParams.get("area"));
+        const city = cleanString(searchParams.get("city"));
+        const search = cleanString(searchParams.get("search"));
+        const { page, limit, skip } = parsePagination(searchParams, {
+            defaultLimit: 12,
+            maxLimit: 60,
+        });
 
         const query: Record<string, unknown> = {};
         if (eventType && eventType !== "all") query.eventType = eventType;
-        if (area) query.area = area;
-        if (city) query.city = city;
+        if (area && area !== "All") query.area = area;
+        if (city && city !== "All") query.city = city;
         if (search) query.$text = { $search: search };
 
-        const skip = (page - 1) * limit;
         const [events, total] = await Promise.all([
-            Event.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+            Event.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .select("-upvotedBy -interestedBy")
+                .lean(),
             Event.countDocuments(query),
         ]);
 
-        return NextResponse.json({
-            events,
-            pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-        });
+        return respondOk(
+            {
+                events,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
+                },
+            },
+            200,
+            "s-maxage=30, stale-while-revalidate=120"
+        );
     } catch (error) {
-        console.error("GET /api/events error:", error);
-        return NextResponse.json({ error: "Failed to fetch events" }, { status: 500 });
+        return handleRouteError("GET /api/events", error);
     }
 }
 
@@ -41,11 +65,23 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         await connectDB();
-        const body = await req.json();
-        const event = await Event.create(body);
-        return NextResponse.json({ event }, { status: 201 });
+        const payload = await req.json();
+        const parsed = eventCreateSchema.safeParse(payload);
+
+        if (!parsed.success) {
+            return respondError("Invalid event payload", 400, parsed.error.flatten());
+        }
+
+        const data = parsed.data;
+
+        const event = await Event.create({
+            ...data,
+            entryFee: data.entryFee ?? "Free",
+            tags: data.tags ?? [],
+        });
+
+        return respondOk({ event }, 201);
     } catch (error) {
-        console.error("POST /api/events error:", error);
-        return NextResponse.json({ error: "Failed to create event" }, { status: 500 });
+        return handleRouteError("POST /api/events", error);
     }
 }
